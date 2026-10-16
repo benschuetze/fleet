@@ -1,0 +1,46 @@
+{
+  "port": 4777,
+  "sessionMaxAgeDays": 14,
+  "refreshSeconds": 5,
+  "prRefreshSeconds": 90,
+  "staleMinutes": 20,
+  "useAgentView": true,
+  "extraRepos": [],
+  "projectsDir": "",
+  "hiddenProjects": [],
+  "hostMap": {
+    "git.meine-firma.de": "gitlab"
+  },
+  "tokens": {
+    "github": "",
+    "gitlab": "",
+    "azureDevOps": "",
+    "bitbucketUser": "",
+    "bitbucketToken": ""
+  },
+  "cloudSessions": [],
+  "billing": "subscription",
+  "worktree": {
+    "auto": "second",
+    "fetch": false,
+    "repos": {
+      "~/code/my-app": { "setup": "pnpm install --frozen-lockfile", "include": ["config/local.json"] }
+    }
+  },
+  "autoHandoff": {
+    "enabled": true,
+    "limitPercent": 85,
+    "contextPercent": 85,
+    "largeContextTokens": 400000,
+    "clearAfter": true,
+    "clearMinTokens": 150000,
+    "archivePredecessor": true
+  },
+  "brake": {
+    "enabled": true,
+    "waitSeconds": 90,
+    "loop": false,
+    "limitPercent": 95,
+    "openFleet": true
+  }
+}

@@ -1,0 +1,138 @@
+/*
+ * Claude Fleet's design tokens ("Design im Terminal-Stil"). Grey is normal, colour means
+ * abnormal: exactly three signal colours, no green. Components read these tokens only, never raw colours.
+ *
+ * Dark is the base. The system's light preference or an explicit choice (data-theme, set before the first paint in
+ * root.tsx) switches to light.
+ */
+:root {
+  --bg-0: #0b0d10;
+  --bg-1: #12151a;
+  --bg-2: #1a1e25;
+  --line: #262b33;
+  --text-1: #e6e8eb;
+  --text-2: #9aa3ad;
+  /* Only for disabled controls and decoration: below 4.5:1, so never for text that must be read. */
+  --text-3: #6b7480;
+  --sel: #4c8dff;
+  --sel-bg: rgba(76, 141, 255, 0.12);
+  --crit: #ff5a5f;
+  --warn: #ff9f43;
+  --att: #f2c94c;
+
+  /*
+   * Signal colour as text inside a row. Rows turn --bg-2 on hover and --sel-bg when selected; in light mode the
+   * plain --crit and --warn fall below 4.5:1 there (tests/contrast.test.ts), so row text takes a darker step of the
+   * same hue. Edges and bars keep the plain tokens (3:1 is enough for shapes).
+   */
+  --crit-text: #ff5a5f;
+  --warn-text: #ff9f43;
+  /*
+   * The diff view only (release 6): removed and added lines, as every diff shows them. The one place green appears;
+   * it means "added", never a status. Text 4.5:1 on its own tinted line (tests/contrast.test.ts).
+   */
+  --diff-add: #7ee2a8;
+  --diff-del: #ff8a8e;
+  --diff-add-bg: rgba(46, 160, 67, 0.16);
+  --diff-del-bg: rgba(248, 81, 73, 0.16);
+  /*
+   * Session tags in the log view only (spec, "Log-Sicht"): the one place outside the grey rule. Cyan, violet,
+   * magenta, pink and sand, each in a light and a dark step; no red, orange, yellow, green or the selection blue, so
+   * the signal colours keep their meaning. Only the tag is coloured, the text stays neutral.
+   */
+  --log-1: #67e8f9;
+  --log-2: #22c3dd;
+  --log-3: #c4b5fd;
+  --log-4: #a78bfa;
+  --log-5: #f0abfc;
+  --log-6: #e879f9;
+  --log-7: #f9a8d4;
+  --log-8: #f472b6;
+  --log-9: #ddd0ad;
+  --log-10: #b9a582;
+
+  /*
+   * The character grid of the one screen (spec, "Ein Schirm im CLI-Look", rules 2, 7, 10): one face, one size, one
+   * line height, widths in ch. --row is the grid line and the height of every row; there is no density any more
+   * (rule 15), so nothing changes it.
+   * The bundled JetBrains Mono subsets have no block or box characters (█ ░ ─): the next face draws them. Menlo,
+   * Consolas and DejaVu Sans Mono give them one column like a digit; SF Mono (ui-monospace) draws them 18 % wider
+   * and would push bars out of their cells, so it comes last.
+   */
+  --font: "JetBrains Mono", Menlo, Consolas, "DejaVu Sans Mono", "SF Mono", ui-monospace, monospace;
+  --fs: 13px;
+  --row: 20px;
+  --col-repos: 28ch;
+  --col-stream: 36ch;
+  --col-drawer: 60ch;
+  --suggest-rows: 8;
+  /* What the fixed layer (the log view) leaves free at the bottom: the status line and the command line. */
+  --foot: calc(2 * var(--row));
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-0: #ffffff;
+    --bg-1: #f6f7f9;
+    --bg-2: #eceef1;
+    --line: #d9dde3;
+    --text-1: #14171b;
+    --text-2: #5b6470;
+    --text-3: #8a939e;
+    --sel: #1f6feb;
+    --sel-bg: rgba(31, 111, 235, 0.12);
+    --crit: #d1242f;
+    --warn: #c2410c;
+    --att: #9a6700;
+    --crit-text: #b5222c;
+    --warn-text: #a83b0e;
+    --diff-add: #116329;
+    --diff-del: #a40e26;
+    --diff-add-bg: rgba(46, 160, 67, 0.14);
+    --diff-del-bg: rgba(248, 81, 73, 0.14);
+    --log-1: #0b7285;
+    --log-2: #0a5c6b;
+    --log-3: #7c3aed;
+    --log-4: #5b21b6;
+    --log-5: #a21caf;
+    --log-6: #86198f;
+    --log-7: #be185d;
+    --log-8: #9d174d;
+    --log-9: #7a6544;
+    --log-10: #5c4d36;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg-0: #ffffff;
+  --bg-1: #f6f7f9;
+  --bg-2: #eceef1;
+  --line: #d9dde3;
+  --text-1: #14171b;
+  --text-2: #5b6470;
+  --text-3: #8a939e;
+  --sel: #1f6feb;
+  --sel-bg: rgba(31, 111, 235, 0.12);
+  --crit: #d1242f;
+  --warn: #c2410c;
+  --att: #9a6700;
+  --crit-text: #b5222c;
+  --warn-text: #a83b0e;
+  --diff-add: #116329;
+  --diff-del: #a40e26;
+  --diff-add-bg: rgba(46, 160, 67, 0.14);
+  --diff-del-bg: rgba(248, 81, 73, 0.14);
+  --log-1: #0b7285;
+  --log-2: #0a5c6b;
+  --log-3: #7c3aed;
+  --log-4: #5b21b6;
+  --log-5: #a21caf;
+  --log-6: #86198f;
+  --log-7: #be185d;
+  --log-8: #9d174d;
+  --log-9: #7a6544;
+  --log-10: #5c4d36;
+  color-scheme: light;
+}

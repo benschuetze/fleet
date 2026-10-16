@@ -1,0 +1,6 @@
+# Biome and the tests expect LF everywhere; without this, Windows checkouts get CRLF and lint fails.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.vbs text eol=crlf
+*.png binary
+*.plugin binary

@@ -1,0 +1,530 @@
+/*
+ * The rows of the one screen (spec, "Ein Schirm im CLI-Look", rules 7, 9, 11): status marks, and the watch board
+ * on the character grid. Loaded after the older sheets, so these rules win in the same layer.
+ */
+@layer components {
+  /* ---------- Status mark: one character, grey; signal colour only for waiting and error ---------- */
+  .mark {
+    display: inline-block;
+    width: 1ch;
+    margin-right: 1ch;
+    font-family: var(--font);
+    text-align: center;
+    color: var(--text-2);
+  }
+  .mark.g-working {
+    color: var(--text-1);
+  }
+  .mark.g-waiting {
+    color: var(--warn-text);
+  }
+  .mark.g-error {
+    color: var(--crit-text);
+  }
+  /* A new ? or ✗ blinks three beats of 1 Hz, then stands (rule 16, ISA-101); the only motion on the screen. */
+  @media (prefers-reduced-motion: no-preference) {
+    .mark.fresh {
+      animation: fleet-new 1s linear 3;
+    }
+  }
+  @keyframes fleet-new {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /*
+   * ---------- Alarm rows on the character grid (rules 7, 9, stage 12.6): one line of --row each, widths in ch ----
+   * Number, mark and kind, where, the title with its cause in one sentence (the rest of the line), since when, one
+   * action. As on the board every cell starts with one empty column. Signal colour only in the 2 px edge and the kind.
+   */
+  .arow {
+    display: grid;
+    /* Kind and countdown fit their longest words, "? Fleet fragt" and "Cache noch 57:00" (round 6: cut at 1440 px).
+     * The "since" column holds "seit 26 Std 57 Min" and "Cache kalt ≈ 164 Tsd." (21 columns) and two of slack for the
+     * wider fonts of the Linux runner (round 8: "Cache abgelauf…", "…57 M…" in 17). */
+    grid-template-columns: 4ch 14ch 17ch minmax(0, 1fr) 24ch auto 3ch;
+    height: var(--row);
+    padding: 0 1ch 0 0;
+    border-left: 2px solid transparent;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    white-space: nowrap;
+  }
+  .arow > * {
+    min-width: 0;
+    padding-left: 1ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Rows are told apart by the hover, not by lines (as on the board). */
+  .arow:hover {
+    background: var(--bg-2);
+  }
+  .arow.t-crit {
+    border-left-color: var(--crit);
+  }
+  .arow.t-warn {
+    border-left-color: var(--warn);
+  }
+  /* An alarm that is neither an error nor waiting for a yes (the limit): marked by brightness, not colour. */
+  .arow.t-hi {
+    border-left-color: var(--text-1);
+  }
+  .arow:focus-within {
+    border-left-color: var(--sel);
+    background: var(--sel-bg);
+  }
+  .arow .nr {
+    font: inherit;
+  }
+  .a-k,
+  .a-where,
+  .a-age {
+    color: var(--text-2);
+  }
+  .arow.t-crit .a-k {
+    color: var(--crit-text);
+  }
+  .arow.t-warn .a-k {
+    color: var(--warn-text);
+  }
+  .arow.t-hi .a-k,
+  .a-where b {
+    color: var(--text-1);
+  }
+  .a-where b {
+    font-weight: 400;
+  }
+  .a-what {
+    display: flex;
+    gap: 0 2ch;
+  }
+  .a-what h3 {
+    margin: 0;
+    font: inherit;
+  }
+  .a-what h3,
+  .a-what .opener {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .a-what .opener {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+  }
+  .a-why {
+    flex: 1 1 0;
+    min-width: 12ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .a-act {
+    max-width: 30ch;
+    justify-self: end;
+  }
+  /* The clear button (release 6, x): grey until the row is hovered or selected, so the action keeps the eye. */
+  .a-x .act-link {
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  /* Buttons in cells are text: no frame, no padding, no icon (rule 8). */
+  .arow :is(.act-link, .ghost, .btn, .tag) {
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+  }
+  .arow :is(.act-link, .ghost, .btn) svg {
+    display: none;
+  }
+  /*
+   * Under 100 columns where and since give their columns to the title; kind and action stay, and so does a countdown
+   * that runs out (a cache, Fleet's question: `a-keep`). Both last columns are auto: without the age the action
+   * moves left and the empty column is 0 wide.
+   */
+  @media (max-width: 779px) {
+    .arow {
+      grid-template-columns: 4ch 14ch minmax(0, 1fr) auto auto;
+    }
+    /* The clear button gives its columns to the title too; x still clears, the drawer has every action. */
+    .arow .a-where,
+    .arow .a-age:not(.a-keep),
+    .arow .a-x {
+      display: none;
+    }
+    .a-what .opener {
+      min-width: 8ch;
+    }
+    .a-why {
+      min-width: 4ch;
+    }
+    .a-age {
+      max-width: 9ch;
+    }
+    .a-act {
+      max-width: 13ch;
+    }
+  }
+
+  /*
+   * Phone (under 520 px, about 46 columns): the cause is what you act on, so it gets the room (practical test 15 Oct:
+   * it was cut to two characters). The title stops at 10 columns, the cache countdown keeps only its time (the word
+   * is in its tooltip), and an action too long ends in "…" instead of being cut mid-word.
+   */
+  @media (max-width: 519px) {
+    .arow .a-cache .cache-w {
+      display: none;
+    }
+    .a-what {
+      gap: 0 1ch;
+    }
+    .a-what h3 {
+      flex: 0 1 auto;
+      max-width: 10ch;
+    }
+    .a-what .opener {
+      min-width: 0;
+    }
+    .a-why {
+      flex: 1 1 0;
+      min-width: 10ch;
+    }
+    .a-act {
+      max-width: 11ch;
+    }
+    .a-act :is(.act-link, .btn, a) {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /*
+   * ---------- Watch board on the character grid (rules 7, 9): one line of --row per row, widths in ch ----------
+   * Every cell starts with one empty column (padding-left 1ch), so a width here is content + 1.
+   */
+  .zone.board-z {
+    background: none;
+    border: 0;
+  }
+  /* The board's tile is the container its columns drop by (below the column widths). */
+  .tile[data-tile="board"] {
+    container: board / inline-size;
+  }
+  /* The tile is the frame: inside it one column of space, no page margins (rule 8). */
+  .now-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .tile-b > .now-main {
+    padding: 0 1ch;
+  }
+  .board-z .z-h,
+  .board-z .z-empty,
+  .board-z .z-foot {
+    min-height: 0;
+    padding: 0 1ch;
+    border: 0;
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .board-z .z-h h2,
+  .b-grp h3 {
+    margin: 0;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  table.wtable {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-variant-numeric: tabular-nums;
+  }
+  .wtable col.c-nr,
+  .wtable col.c-st {
+    width: 4ch;
+  }
+  .wtable col.c-repo {
+    width: 15ch;
+  }
+  .wtable col.c-branch {
+    width: 16ch;
+  }
+  .wtable col.c-doing {
+    width: 11ch;
+  }
+  .wtable col.c-age {
+    width: 8ch;
+  }
+  /* "≈ 175 Tsd." and one column of slack; the unit is in the title (round 7: cut to "≈ 175 …", then 19 columns
+   * left the task 77 px on the CI runner). */
+  .wtable col.c-cache {
+    width: 12ch;
+  }
+  /* Bar 7 + number 6 + 1, and one column of slack: the bar's characters come from a fallback face (tokens.css). */
+  .wtable col.c-ctx {
+    width: 15ch;
+  }
+  .wtable col.c-pr {
+    width: 10ch;
+  }
+  .wtable col.c-act {
+    width: 13ch;
+  }
+  /*
+   * A wide board (1440 px beside the repo bar and the stream) gives the repo its "billing-service" and the PR a draft
+   * with its CI mark (round 7: both cut at 1440 px); a narrower one keeps the old widths, or the task falls below 12
+   * columns (round 7, CI at 1280 px: 69 px).
+   */
+  @container board (min-width: 900px) {
+    .wtable col.c-repo {
+      width: 17ch;
+    }
+    .wtable col.c-pr {
+      width: 16ch;
+    }
+    .wtable col.c-act {
+      width: 11ch;
+    }
+  }
+  /* At 1280 px the context column shows its number, the bar is for readers only: repo and PR fit (6.0.1). */
+  @container board (min-width: 770px) and (max-width: 899px) {
+    .wtable col.c-ctx {
+      width: 9ch;
+    }
+    .wtable .cbar .cb {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .wtable col.c-repo {
+      width: 17ch;
+    }
+    .wtable col.c-pr {
+      width: 16ch;
+    }
+    .wtable col.c-act {
+      width: 11ch;
+    }
+  }
+  /*
+   * Columns drop by the width of the board's tile, not of the window: beside the repo bar and the stream (stage
+   * 12.3) it is 63 columns narrower than the window from 1280 px. Round 7 counted what the columns need (the repo,
+   * PR and cache columns got wider) with a task of at least 12 columns: all of them 992 px; without the branch
+   * 865 px (the cache stays at the plan's 1440 px, the board is 947 px there); without the cache 770 px (the context
+   * bar stays at 1280 px); without it 655 px (age and action stay); below that the phone's columns. In px: `ch` in
+   * a container query would count in the tile's text font, not the grid's. After the widths above, or a hidden
+   * column keeps its width. A hidden column is collapsed, not `display: none`: without its cells the group lines
+   * (`colSpan` over all columns) would add an empty column that halves the task.
+   */
+  @container board (max-width: 991px) {
+    .wtable col.c-branch {
+      width: 0;
+    }
+    .wtable th.c-branch,
+    .wtable td.c-branch {
+      visibility: hidden;
+      padding: 0;
+    }
+  }
+  @container board (max-width: 864px) {
+    .wtable col.c-cache {
+      width: 0;
+    }
+    .wtable th.c-cache,
+    .wtable td.c-cache {
+      visibility: hidden;
+      padding: 0;
+    }
+  }
+  @container board (max-width: 769px) {
+    .wtable col.c-ctx {
+      width: 0;
+    }
+    .wtable th.c-ctx,
+    .wtable td.c-ctx {
+      visibility: hidden;
+      padding: 0;
+    }
+  }
+  @container board (max-width: 654px) {
+    .wtable col.m-hide {
+      width: 0;
+    }
+    .wtable th.m-hide,
+    .wtable td.m-hide {
+      visibility: hidden;
+      padding: 0;
+    }
+  }
+  .wtable th,
+  .wtable td {
+    height: var(--row);
+    padding: 0 0 0 1ch;
+    vertical-align: middle;
+    border: 0;
+    font-size: var(--fs);
+    line-height: var(--row);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wtable thead th {
+    font-family: var(--font);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--text-2);
+    background: none;
+  }
+  .wtable tbody tr:hover td {
+    background: var(--bg-2);
+  }
+  .b-row td:first-child {
+    border-left: 2px solid transparent;
+  }
+  /* The selected row is the only bold one besides titles. */
+  .wtable tbody tr.b-row:focus-within td {
+    font-weight: 700;
+    background: var(--sel-bg);
+  }
+  .wtable tbody tr.b-row:focus-within td:first-child {
+    border-left-color: var(--sel);
+  }
+  .wtable .b-grp th,
+  .wtable .b-repo th {
+    text-align: left;
+    font-weight: 400;
+    background: transparent;
+    text-transform: none;
+  }
+  .wtable .b-repo th {
+    padding-left: 2ch;
+    color: var(--text-2);
+  }
+  .wtable tbody tr.b-grp:hover th,
+  .wtable tbody tr.b-repo:hover th {
+    background: transparent;
+  }
+  .fold {
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+  }
+  .fold:disabled {
+    cursor: default;
+  }
+  .wtable td.c-nr {
+    text-align: right;
+  }
+  .c-branch,
+  .c-age,
+  .c-cache,
+  .c-doing,
+  .wtable .ext {
+    color: var(--text-2);
+  }
+  .c-task .opener {
+    display: block;
+    /* A block button still sizes to its text; without this the cell clips mid-letter and the ellipsis never shows */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+  .c-act {
+    text-align: right;
+  }
+  .wtable .mark {
+    margin-right: 0;
+  }
+  .wtable .act-link,
+  .pr-cell .pr-n,
+  .pr-cell .hint {
+    padding: 0;
+    font: inherit;
+  }
+  .pr-cell .pr-n {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+  }
+  .wtable .act-link svg {
+    display: none;
+  }
+  /* `███░░░░  42 %`: the bar, then the number right-aligned in its own five columns. */
+  .cbar {
+    white-space: pre;
+    color: var(--text-2);
+  }
+  .cbar.hi {
+    color: var(--text-1);
+  }
+  .cbar .num {
+    display: inline-block;
+    width: 6ch;
+    text-align: right;
+  }
+  /* Same branch or task without a shared file: there to merge, but nothing collides; grey (spec, Konflikt). */
+  .wtable tr.b-dup.parallel td {
+    color: var(--text-2);
+  }
+
+  /*
+   * ---------- Phone ----------
+   * Wider windows drop the board's columns by its tile's width (`@container board` above). The phone's auto layout
+   * needs the cells gone, not collapsed: there a hidden cell would still take its content's width. With half the
+   * columns gone, a fixed layout keeps the old widths; the task takes what the others leave.
+   */
+  @media (max-width: 700px) {
+    .t-hide {
+      display: none;
+    }
+    table.wtable {
+      table-layout: auto;
+    }
+    .wtable td.c-task {
+      width: 100%;
+      max-width: 0;
+    }
+    .wtable td.c-repo {
+      max-width: 12ch;
+    }
+    .wtable td.c-doing,
+    .wtable td.c-pr {
+      max-width: 9ch;
+    }
+  }
+}
+
+/* A session in a worktree Fleet made: the repo's name, then the worktree, quieter (release 6.1.0). */
+.wt-mark {
+  color: var(--text-2);
+}

@@ -1,0 +1,360 @@
+/*
+ * The other views (Repos & PRs, Usage, Activity) and the drawer's cards, flattened onto the tokens: type, tables,
+ * tags, bars, buttons, the balance and the activity lanes. Loaded after app.css, so these rules win in the same layer.
+ */
+@layer components {
+  /* ---------- Type: numbers line up, one weight for emphasis, secondary text smaller ---------- */
+  .mono,
+  .num,
+  .tag,
+  kbd,
+  code,
+  pre {
+    font-variant-numeric: tabular-nums;
+  }
+  .mono,
+  .num {
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  b,
+  strong {
+    font-weight: 500;
+  }
+  .hint,
+  .sub,
+  .why,
+  .ufoot {
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  th {
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    background: var(--bg-2);
+    padding: 0 8px;
+    height: var(--row);
+    vertical-align: middle;
+  }
+  /* Tables without vertical lines and without lines between rows: the hover separates them. */
+  td {
+    border-bottom: 0;
+    padding: 4px 8px;
+  }
+  .ev,
+  .prrow {
+    border-bottom: 0;
+    border-top: 0;
+  }
+  a {
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+  }
+  svg.i {
+    width: 14px;
+    height: 14px;
+    color: var(--text-2);
+  }
+  .act-link svg.i,
+  .iconbtn svg.i {
+    color: var(--text-1);
+  }
+
+  /* ---------- Editable: the one place for --att (Bloomberg's amber fields) ---------- */
+  textarea {
+    border: 1px solid var(--att);
+    background: var(--bg-0);
+  }
+  textarea:focus {
+    outline: 2px solid var(--sel);
+    outline-offset: 1px;
+    border-color: var(--att);
+  }
+
+  /* ---------- Waiting is orange; thresholds are brighter grey, never a colour ---------- */
+  .lim .track,
+  .meter .mbar,
+  .bar {
+    height: 6px;
+    border: 0;
+    background: var(--bg-2);
+  }
+  .bar i,
+  .bar i.full,
+  .lim .track i,
+  .meter .mbar i {
+    background: var(--text-2);
+  }
+  .lim .track i.w,
+  .lim .track i.c,
+  .meter .mbar i.w,
+  .meter .mbar i.c {
+    background: var(--text-1);
+  }
+  .lim .note.w,
+  .meter .line.w,
+  .meter .line.c,
+  .kpi .v.w,
+  .lane .wt.w {
+    color: var(--text-1);
+  }
+  .warn {
+    border: 0;
+    border-left: 2px solid var(--text-1);
+    color: var(--text-1);
+    background: var(--bg-1);
+  }
+
+  /* ---------- Buttons are text (rule 8): underlined like a link, no frame, no fill, no padding ---------- */
+  .btn,
+  .ghost {
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-1);
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+  }
+  .btn.on,
+  .btn.primary,
+  .ghost.on {
+    color: var(--text-1);
+    font-weight: 700;
+    text-decoration-color: currentColor;
+  }
+  /* Text buttons: the fill and frame of app.css's primary and danger buttons go too (round 3: red text on red). */
+  .btn.primary,
+  .btn.danger {
+    border: 0;
+    background: none;
+  }
+  .btn.danger {
+    color: var(--crit);
+    font-weight: 700;
+    text-decoration-color: currentColor;
+  }
+  .btn:disabled,
+  .ghost:disabled {
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  /* ---------- Sections: one column of space inside (rule 8) ---------- */
+  .card-h,
+  .panel,
+  .prrepo,
+  .projcard,
+  .zone.empty,
+  .empty {
+    padding: 0 1ch;
+  }
+
+  /* Fleet balance card on the usage page. */
+  .bal-figs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .bal-figs .big {
+    font-size: var(--fs);
+    white-space: nowrap;
+  }
+  .bal-figs .big.bal-neg {
+    color: var(--text-1);
+    border-left: 2px solid var(--text-1);
+    padding-left: 6px;
+  }
+  .bal-table td,
+  .bal-table th {
+    padding: 4px 8px;
+  }
+  .bal-days {
+    list-style: none;
+    margin: 10px 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .bal-days li {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font);
+    font-size: var(--fs);
+    color: var(--text-2);
+  }
+  .bal-bars {
+    display: grid;
+    gap: 1px;
+  }
+  .bal-c,
+  .bal-s {
+    display: block;
+    height: 4px;
+    min-width: 0;
+  }
+  .bal-c {
+    background: var(--text-3);
+  }
+  .bal-s {
+    background: var(--text-1);
+  }
+  .bal-warn {
+    color: var(--text-1);
+    border-left: 2px solid var(--text-1);
+    padding-left: 6px;
+  }
+  @media (max-width: 520px) {
+    .bal-figs {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---------- Sections elsewhere: flat, one 1 px line around, no fill, no coloured frame ---------- */
+  .card,
+  .panel,
+  .projcard,
+  .prrepo {
+    background: none;
+    border: 1px solid var(--line);
+  }
+  .card-h h2,
+  .panel h3 {
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .card-h,
+  .list,
+  .ledger,
+  .meter,
+  .ctrls,
+  .legend,
+  .ufoot {
+    padding-left: 1ch;
+    padding-right: 1ch;
+  }
+  /* Tags are words (rule 8): no frame, no fill; signal colour only as text. */
+  .tag {
+    font: inherit;
+    letter-spacing: 0;
+    border: 0;
+    background: none;
+    padding: 0;
+  }
+  .tag.blue,
+  .tag.green,
+  .tag.violet {
+    color: var(--text-2);
+  }
+  .tag.amber {
+    color: var(--warn);
+  }
+  .tag.red {
+    color: var(--crit);
+  }
+  /* Notable without being an alarm (loop, important hint): brighter, not coloured. */
+  .tag.hi {
+    color: var(--text-1);
+  }
+  /* Without frames, neighbouring tags need a separator, or "CI läuft" and "Entwurf" read as one. Inline-block: a
+     link's underline stays off it. Low specificity: the drawer's own separators (.sd-tags) win there. */
+  :where(.tag + .tag)::before {
+    content: "· ";
+    display: inline-block;
+    white-space: pre;
+    color: var(--text-2);
+  }
+  .done-res {
+    margin-top: 6px;
+    font-size: var(--fs);
+  }
+  .done-res .bad-t {
+    color: var(--crit);
+  }
+  /* Paths stand whole (Ben, 15 Oct): too long, they wrap onto the next line, never "…". */
+  .mono.path {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .handoffs {
+    gap: 8px;
+  }
+  .cache.low {
+    color: var(--text-1);
+  }
+  .cache.gone {
+    color: var(--text-2);
+  }
+
+  /* ---------- Activity: repo lanes filter the history, the week report to take away ---------- */
+  .lane button.who {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    text-align: left;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  /* Underlined like a link: the repo name filters the history. */
+  .lane button.who b {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+  }
+  .lane.on {
+    box-shadow: inset 2px 0 0 var(--sel);
+    background: var(--sel-bg);
+  }
+  .lane.on button.who {
+    padding-left: 6px;
+  }
+  .report-links,
+  .ledger-filter {
+    margin-left: auto;
+    font-size: var(--fs);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .report-links .link,
+  .ledger-filter .link {
+    font-size: inherit;
+  }
+  .ledger-filter {
+    margin: 0 0 4px;
+  }
+  ol.events {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/*
+ * Lines of the other views (release 6, plan R11): j/k walk them; the selected one looks like a selected row on
+ * "Now": --sel edge, --sel-bg ground. Table rows mark their first cell, the edge stays on the grid.
+ */
+@layer components {
+  [data-line]:focus {
+    outline: none;
+    background: var(--sel-bg);
+  }
+  :not(tr)[data-line]:focus {
+    box-shadow: inset 2px 0 0 var(--sel);
+  }
+  tr[data-line]:focus > td {
+    background: var(--sel-bg);
+  }
+  tr[data-line]:focus > td:first-child {
+    box-shadow: inset 2px 0 0 var(--sel);
+  }
+}

@@ -1,0 +1,169 @@
+/*
+ * The keyboard (spec, "Tastatursteuerung komplett"): the selected row, the help overlay, the command palette, the
+ * first-run hint, the inline reply and the status filter. The selection is a blue left edge plus a light
+ * background, never a frame alone; the inline reply is editable and so the one place in --att here.
+ * Loaded after drawer.css.
+ */
+@layer components {
+  /* ---------- Selection: focus on the row itself ---------- */
+  [data-row]:focus {
+    outline: none;
+  }
+  [data-row]:focus-visible {
+    outline: none;
+  }
+  .decision[data-row] {
+    border-left: 2px solid transparent;
+  }
+  .wtable tbody tr.b-row:focus td {
+    background: var(--sel-bg);
+  }
+  .wtable tbody tr.b-row:focus td:first-child {
+    border-left-color: var(--sel);
+  }
+  .decision[data-row]:focus-within {
+    border-left-color: var(--sel);
+  }
+  .decision[data-row]:focus-within {
+    background: var(--sel-bg);
+  }
+
+  /* ---------- Inline reply ---------- */
+  .reply-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 4px 24px;
+  }
+  .reply-line input {
+    flex: 1;
+    min-width: 0;
+    height: var(--row);
+    padding: 0 8px;
+    font: inherit;
+    color: var(--text-1);
+    background: var(--bg-0);
+    border: 1px solid var(--att);
+  }
+  .reply-line input:focus {
+    outline: 2px solid var(--sel);
+    outline-offset: 1px;
+  }
+
+  /* ---------- Status filter and question in the status line ---------- */
+  .fbar {
+    margin: 0 0 8px;
+    font-size: var(--fs);
+    color: var(--text-2);
+  }
+  .fbar b {
+    color: var(--text-1);
+  }
+  .fbar kbd,
+  .modal kbd {
+    font-family: var(--font);
+    font-size: var(--fs);
+    color: var(--text-1);
+    border: 1px solid var(--line);
+    padding: 0 4px;
+  }
+  .sl-ask {
+    color: var(--text-1);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- First-run hint ---------- */
+
+  /* ---------- Help and palette ---------- */
+  dialog.modal {
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(80vh, 720px);
+    margin: 10vh auto auto;
+    padding: 0;
+    color: var(--text-1);
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    font-size: var(--fs);
+  }
+  dialog.modal[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  dialog.modal::backdrop {
+    background: var(--bg-0);
+    opacity: 0.7;
+  }
+  .modal .m-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal .m-head h2 {
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-weight: 600;
+    margin: 0;
+  }
+  .modal .m-head .act-link {
+    margin-left: auto;
+  }
+  .modal .m-search {
+    margin: 8px 12px;
+    height: 32px;
+    padding: 0 8px;
+    font: inherit;
+    color: var(--text-1);
+    background: var(--bg-0);
+    border: 1px solid var(--line);
+  }
+  /* The one note about the stage 12 keymap break: a line of text, no colour (nothing to act on). */
+  .modal .keys-changed {
+    margin: 0;
+    padding: 4px 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-1);
+  }
+  .modal .m-body {
+    overflow: auto;
+    padding: 0 12px 12px;
+  }
+  .modal h3 {
+    margin: 12px 0 4px;
+    font-size: var(--fs);
+    line-height: var(--row);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    font-weight: 400;
+  }
+  .keylist {
+    margin: 0;
+  }
+  .keylist > div {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 8px;
+    padding: 2px 0;
+  }
+  .keylist dt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .keylist dd {
+    margin: 0;
+  }
+  .keylist .later dd {
+    color: var(--text-2);
+  }
+
+  @media (max-width: 640px) {
+    .keylist > div {
+      grid-template-columns: 110px 1fr;
+    }
+  }
+}

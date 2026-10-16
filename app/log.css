@@ -1,0 +1,147 @@
+/*
+ * The log view (spec, "Log-Sicht (Shift+L)"): a second layer over every view, the whole screen above the status line,
+ * one line per step. Grey like the rest; colour only for the session tags (--log-*) and for signals in the grammar of
+ * "Now": an error line red, the line of a session waiting for you orange, each as text and a 2 px edge.
+ * Loaded after keys.css.
+ */
+@layer components {
+  .logview {
+    position: fixed;
+    inset: 0 0 var(--foot) 0;
+    z-index: 35;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-0);
+    color: var(--text-1);
+  }
+  .log-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-1);
+    min-width: 0;
+  }
+  .log-head h2 {
+    margin: 0;
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-weight: 600;
+  }
+  .log-head .hint {
+    color: var(--text-2);
+    font-size: var(--fs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+  }
+  .log-lines {
+    flex: 1;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .log-lines:focus-visible {
+    outline: 2px solid var(--sel);
+    outline-offset: -2px;
+  }
+  .log-line {
+    display: grid;
+    grid-template-columns: 9ch 3ch 7ch minmax(0, 14ch) 7ch 9ch minmax(0, 1fr);
+    gap: 8px;
+    padding: 0 12px 0 10px;
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .log-line > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .log-at,
+  .log-nr,
+  .log-who,
+  .log-tool {
+    color: var(--text-2);
+  }
+  .log-who {
+    font-family: var(--font);
+    font-size: var(--fs);
+  }
+  .log-sig {
+    font-size: var(--fs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .log-line.sig-crit {
+    border-left-color: var(--crit);
+  }
+  .log-line.sig-crit .log-sig,
+  .log-line.sig-crit .log-text {
+    color: var(--crit);
+  }
+  .log-line.sig-warn {
+    border-left-color: var(--warn);
+  }
+  .log-line.sig-warn .log-sig,
+  .log-line.sig-warn .log-text {
+    color: var(--warn);
+  }
+  .log-tag.c1 {
+    color: var(--log-1);
+  }
+  .log-tag.c2 {
+    color: var(--log-2);
+  }
+  .log-tag.c3 {
+    color: var(--log-3);
+  }
+  .log-tag.c4 {
+    color: var(--log-4);
+  }
+  .log-tag.c5 {
+    color: var(--log-5);
+  }
+  .log-tag.c6 {
+    color: var(--log-6);
+  }
+  .log-tag.c7 {
+    color: var(--log-7);
+  }
+  .log-tag.c8 {
+    color: var(--log-8);
+  }
+  .log-tag.c9 {
+    color: var(--log-9);
+  }
+  .log-tag.c10 {
+    color: var(--log-10);
+  }
+  .log-empty {
+    padding: 16px 12px;
+    color: var(--text-2);
+  }
+
+  /* Phone: tag, tool and text; time and name only where there is room. */
+  @media (max-width: 640px) {
+    .log-line {
+      grid-template-columns: 3ch 7ch 6ch 6ch minmax(0, 1fr);
+      padding: 0 8px 0 6px;
+    }
+    .log-at,
+    .log-who {
+      display: none;
+    }
+    .log-head .hint {
+      display: none;
+    }
+  }
+}

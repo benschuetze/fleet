@@ -1,0 +1,12 @@
+config.json
+node_modules/
+*.tmp
+.DS_Store
+test-results/
+playwright-report/
+build/
+dist/
+.react-router/
+
+# Private Architekturmappe, nie pushen
+/.architektur/

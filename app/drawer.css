@@ -1,0 +1,674 @@
+/*
+ * The drawer, tile 5 (spec, "Ein Schirm im CLI-Look", rule 10): the right column of the middle, 60 columns, in the
+ * event stream's place; it scrolls for itself. The frame comes from .tile (screen.css); no new signal colour.
+ */
+@layer components {
+  .middle > .tile.drawer {
+    flex: 0 0 var(--col-drawer);
+    max-width: 100%;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    color: var(--text-1);
+  }
+  /* The drawer stands where the stream stood: on a wide window only one of them shows (lib/tiles.ts, `covered`). */
+  @media (min-width: 780px) {
+    .middle:has(> .tile.drawer) > .tile[data-tile="stream"] {
+      display: none;
+    }
+  }
+  /* The title gives way to the buttons in the frame line, which stand at its right end. */
+  .drawer .tile-t {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .drawer .tile-a {
+    flex: none;
+    display: flex;
+    gap: 2ch;
+    margin-left: auto;
+  }
+  .drawer .tile-a .link {
+    padding: 0;
+    color: var(--text-1);
+  }
+  .drawer .tile-a + .pos {
+    margin-left: 0;
+  }
+  .drawer .d-meta {
+    margin: 0;
+    color: var(--text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .drawer .badge {
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .drawer .d-confirm p {
+    margin: var(--row) 0;
+  }
+  /*
+   * ---------- What the drawer shows: lines on the grid, no card (rules 7–9) ----------
+   * One face, one size, one line height for everything in it; whole lines between parts. Tags and buttons are text:
+   * no frame, no fill, no icon; a threshold is lighter grey, the only colours are a waiting question and an error.
+   */
+  .drawer :is(.sd, .d-meta, .ho-panel) *,
+  .drawer .sd-h {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: 0;
+  }
+  .drawer .sd :is(p, ul, ol, dl, dd, fieldset) {
+    margin: 0;
+  }
+  .drawer .sd > * + *,
+  .drawer .detail > :is(.acts, .kv, details, p) {
+    margin-top: var(--row);
+  }
+  .sd-dim,
+  .drawer .kv dt,
+  .drawer details.tech summary {
+    color: var(--text-2);
+  }
+  .sd-msg {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .sd-ask {
+    color: var(--warn-text);
+  }
+  .sd-err {
+    color: var(--crit-text);
+  }
+  .drawer .sd-h {
+    margin: var(--row) 0 0;
+    font-weight: 700;
+    text-transform: none;
+    color: var(--text-1);
+  }
+  .sd-todos,
+  .sd-advice {
+    list-style: none;
+    padding: 0;
+  }
+  /*
+   * The conversation (release 6): your prompts and Claude's answers as whole paragraphs, tool calls one grey line
+   * each, cut at the edge; an error in red text (colour grammar: --crit only errors). "Jetzt" is the last line.
+   */
+  .sd-chat {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sd-chat li {
+    color: var(--text-2);
+  }
+  .sd-chat li b {
+    font-weight: 400;
+    color: var(--text-1);
+  }
+  .sd-chat li:is(.c-you, .c-claude) {
+    color: var(--text-1);
+  }
+  .sd-chat li.c-you b,
+  .sd-chat li.c-claude b,
+  .sd-now b {
+    font-weight: 700;
+  }
+  /* A tool line names a path or a command: whole, wrapped when long (Ben, 15 Oct). */
+  .sd-chat li:is(.c-tool, .c-error) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .sd-chat li.c-error {
+    color: var(--crit-text);
+  }
+  .sd-chat li.c-open {
+    color: var(--text-1);
+  }
+  .sd-todos li.done {
+    color: var(--text-2);
+  }
+  .sd-todos li.now {
+    font-weight: 700;
+  }
+  .sd-advice li + li {
+    margin-top: var(--row);
+  }
+  .sd-advice p {
+    color: var(--text-2);
+  }
+  .drawer .tag {
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .sd-tags > * + *::before {
+    content: " · ";
+    white-space: pre;
+    color: var(--text-2);
+  }
+  .drawer .ctx.cbar,
+  .drawer .detail {
+    display: block;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .drawer :is(.ghost, .btn, .act-link) {
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--text-1);
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+  }
+  .drawer :is(.ghost, .act-link)[aria-pressed="true"],
+  .drawer .ghost.on {
+    font-weight: 700;
+    text-decoration-color: var(--sel);
+  }
+  .drawer :is(.ghost, .btn, .act-link, .link) svg {
+    display: none;
+  }
+  .drawer .acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2ch;
+    padding: 0;
+    border: 0;
+  }
+  .drawer .kv {
+    display: grid;
+    grid-template-columns: 16ch minmax(0, 1fr);
+    gap: 0 1ch;
+  }
+  .drawer .kv dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  /* The note: the one field here that takes typing, marked by its cursor (colour grammar: --att is editable). */
+  .drawer textarea.sd-note {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(3 * var(--row));
+    padding: 0 0 0 1ch;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: none;
+    font: inherit;
+    color: var(--text-1);
+    caret-color: var(--att);
+    resize: vertical;
+    outline: none;
+  }
+  .drawer textarea.sd-note:focus-visible {
+    border-left-color: var(--sel);
+  }
+  /* A pipeline (stage 12.6): jobs, tests and the log excerpt as lines; the log scrolls with the tile body. */
+  .drawer .runbox {
+    gap: var(--row);
+    margin: 0;
+  }
+  .drawer .runbox .jobs {
+    gap: 0;
+  }
+  .drawer .runbox .jobs li {
+    gap: 1ch;
+  }
+  .drawer .runbox .jobs .st,
+  .drawer .runbox .jobs .st.running {
+    width: 1ch;
+    height: auto;
+    margin: 0;
+    border: 0;
+    animation: none;
+  }
+  .drawer .runbox .sub,
+  .drawer .runbox .jobs .st:not(.failure) {
+    color: var(--text-2);
+  }
+  .drawer .runbox :is(.note, ul.tests, .jobs .st.failure) {
+    color: var(--crit-text);
+  }
+  .drawer .runbox ul.tests {
+    padding-left: 2ch;
+  }
+  .drawer .runbox pre {
+    max-height: none;
+    padding: 0 0 0 1ch;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: none;
+    color: var(--text-1);
+  }
+  /* The terminal scrolls by itself (xterm); the body only gives it the height that is left. */
+  .drawer .tile-b.d-term {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 0 0 1ch;
+  }
+  .term {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .term-box {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .term-box .xterm {
+    height: 100%;
+  }
+  /* xterm.css paints the viewport and its scroll area black; the pane is a zone in --bg-1 like the others. */
+  .term-box .xterm,
+  .term-box .xterm-viewport,
+  .term-box .xterm-screen {
+    background-color: var(--bg-1);
+  }
+  .term-foot {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 12px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font);
+    font-size: var(--fs);
+    color: var(--text-2);
+  }
+  .term-state {
+    flex: 1;
+  }
+  .ext-badge {
+    font-family: var(--font);
+    font-size: var(--fs);
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-left: 6px;
+  }
+  /* A new session per repo on "Repos & PRs": task field and start button in one line. */
+  .new-session {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    max-width: 320px;
+  }
+  .new-session input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: var(--fs);
+    padding: 2px 6px;
+    background: var(--bg-0);
+    color: var(--text-1);
+    border: 1px solid var(--line);
+  }
+  /* ---------- Conflict drawer: A left, the folder tree in the middle, B right ---------- */
+  .c-sum {
+    margin: 0 0 4px;
+  }
+  .c-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    margin: 8px 0;
+  }
+  .c-side {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .c-side > * {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .c-cols .c-side:last-child {
+    text-align: right;
+  }
+  .c-tag,
+  .c-m {
+    font-family: var(--font);
+    font-size: var(--fs);
+    color: var(--text-2);
+  }
+  .c-tree,
+  .c-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .c-tree {
+    border-top: 1px solid var(--line);
+  }
+  .c-row {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+    align-items: center;
+    min-height: var(--row);
+  }
+  .c-m {
+    text-align: center;
+  }
+  .c-row > button {
+    min-width: 0;
+    text-align: left;
+    padding-left: calc(var(--d, 0) * 12px);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  /* What only one side changed is quiet; what both changed reads first. */
+  .c-file > button {
+    color: var(--text-2);
+  }
+  .c-file.both > button,
+  .c-file.both .c-m {
+    color: var(--text-1);
+  }
+  .c-file > button[aria-pressed="true"] {
+    background: var(--sel-bg);
+    box-shadow: inset 2px 0 0 var(--sel);
+  }
+  .c-file .sig {
+    margin-left: 6px;
+  }
+  .c-hunks {
+    margin-top: 12px;
+  }
+  .c-hunks h3 {
+    margin: 0 0 4px;
+    font-family: var(--font);
+    font-size: var(--fs);
+    font-weight: 400;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .c-two {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+  .c-diff {
+    margin: 0;
+    max-height: 320px;
+    overflow: auto;
+    padding: 4px 6px;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    white-space: pre;
+    color: var(--text-2);
+    background: var(--bg-0);
+    border: 1px solid var(--line);
+  }
+  .c-diff-box {
+    min-width: 0;
+  }
+  .c-ways {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: baseline;
+    margin: 12px 0 0;
+    padding: 8px 0 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+  .c-way {
+    display: inline-flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  /* A real merge conflict between PRs is merge danger: red text, nothing else red. */
+  .act-link.crit {
+    color: var(--crit-text);
+  }
+  .pr-conflicts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+  }
+  .d-list li .pr-conflicts {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+  /* ---------- Duplicate group: lines, no card (rule 8) ---------- */
+  .dup-panel {
+    margin-bottom: var(--row);
+  }
+  .dup-panel h3 {
+    margin: 0;
+    font: inherit;
+    font-weight: 700;
+  }
+  .dup-panel > p {
+    margin: 0;
+  }
+  /* ---------- Handoff drawer: lines, no card (rule 8) ---------- */
+  .ho-panel h4 {
+    margin: var(--row) 0 0;
+    font: inherit;
+    font-weight: 700;
+  }
+  .ho-panel ol,
+  .ho-panel ul {
+    margin: 0;
+    padding-left: 3ch;
+  }
+  .ho-panel .why {
+    color: var(--text-2);
+  }
+  /* Opened in a new session, which now waits there for Enter. */
+  .ho-panel .why.waiting {
+    color: var(--warn-text);
+  }
+  .ho-panel .acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2ch;
+    margin-top: var(--row);
+  }
+  .dup-list {
+    margin: 0;
+    padding-left: 3ch;
+  }
+  .dup-list li {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .dup-act {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2ch;
+    align-items: baseline;
+  }
+
+  /* ---------- Repo drawer: tabs, lists, days, tools ---------- */
+  /* One line of tabs at the top of the drawer tile; it stays while the tile body scrolls under it. */
+  .d-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    gap: 2ch;
+    height: var(--row);
+    background: var(--bg-0);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .d-tabs [role="tab"] {
+    padding: 0;
+    font: inherit;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .d-tabs [role="tab"][aria-selected="true"] {
+    color: var(--text-1);
+    font-weight: 700;
+    text-decoration: underline 2px var(--sel);
+    text-underline-offset: 4px;
+  }
+  /* The drawer tile's body scrolls (.tile-b); inside it nothing needs a scroll of its own. */
+  .drawer .d-body {
+    padding: 0 1ch;
+  }
+  /* One line per entry on the grid: no padding, no rule between lines (the hover separates nothing here). */
+  .d-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .d-list li {
+    display: grid;
+    /* The status word stands whole, "wartet · Fleet fragt" too (round 6: "wartet · F…"). */
+    grid-template-columns: 20ch minmax(0, 1fr) auto;
+    gap: 1ch;
+    align-items: baseline;
+    min-height: var(--row);
+  }
+  .d-list li > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .d-list li .link {
+    text-align: left;
+  }
+  .d-list li .num {
+    grid-column: 3;
+  }
+  .d-list li .mono.hint {
+    grid-column: 2;
+  }
+  .d-list li.past,
+  .d-st {
+    color: var(--text-2);
+  }
+  .d-days {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .d-days th,
+  .d-days td {
+    height: var(--row);
+    padding: 0 1ch 0 0;
+    font-weight: 400;
+    color: var(--text-2);
+    background: none;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .d-days th {
+    width: 6ch;
+    text-align: left;
+  }
+  .d-days td.num {
+    width: 9ch;
+    text-align: right;
+  }
+  /* A day's share as a bar in the repo drawer: grey, brighter past a threshold. */
+  .bar6 {
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+  }
+  .bar6 .track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .bar6 .track i {
+    display: block;
+    height: 100%;
+    background: var(--text-2);
+  }
+  .bar6 .track i.hi {
+    background: var(--text-1);
+  }
+  .bar6 .num {
+    min-width: 6ch;
+    color: var(--text-2);
+    text-align: right;
+  }
+  .bar6 .num.hi {
+    color: var(--text-1);
+  }
+  .d-tools {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* ---------- Architecture notes: Markdown as lines, headings bold, no boxes ---------- */
+  .md h3,
+  .md h4,
+  .md h5 {
+    margin: var(--row) 0 0;
+    font: inherit;
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  .md p,
+  .md ul,
+  .md ol,
+  .md pre {
+    margin: 0 0 var(--row);
+  }
+  .md ul,
+  .md ol {
+    padding-left: 2ch;
+  }
+  .md ul {
+    list-style: disc;
+  }
+  .md ol {
+    list-style: decimal;
+  }
+  .md code {
+    background: var(--bg-2);
+  }
+  .md pre {
+    padding: 0 1ch;
+    border-left: 1px solid var(--line);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  @media (max-width: 700px) {
+    .d-list li {
+      grid-template-columns: 10ch minmax(0, 1fr);
+    }
+    .d-list li .num {
+      display: none;
+    }
+  }
+  @media (max-width: 700px) {
+    .c-two {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .term-box .xterm-cursor-blink {
+      animation: none;
+    }
+  }
+}

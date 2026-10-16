@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+
+# Fixed versions for advisories in build tooling (GHSA-2g4f-4pwh-qvx6); nothing here ships to the server.
+overrides:
+  ajv@>=7.0.0 <8.18.0: ^8.18.0

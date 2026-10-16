@@ -1,0 +1,618 @@
+/*
+ * The one screen (spec, "Ein Schirm im CLI-Look"): a grid as high as the window, tiles with their title in the
+ * frame line, scrolling only inside a tile. Loaded after the older sheets, so these rules win in the same layer.
+ */
+@layer components {
+  .screen {
+    height: 100vh;
+    /* Rule 1: the page never has a scroll bar. */
+    overflow: hidden;
+    display: grid;
+    grid-template-rows:
+      auto /* header, messages */
+      auto /* the alarm zone: frame line and one to three rows */
+      minmax(0, 1fr) /* the middle: fills the rest; minmax(0, …), or its content stretches it */
+      var(--row) /* status line */
+      var(--row); /* command line */
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On a phone 100vh reaches under the address bar; dvh follows it (rule 17). */
+  @supports (height: 100dvh) {
+    .screen {
+      height: 100dvh;
+    }
+  }
+  .screen-top,
+  .screen-alarm {
+    min-width: 0;
+  }
+  /*
+   * The alarm zone, tile 1 (rule 2): the frame line, then six rows on the grid (release 6: three were too few); more scroll inside the tile, and
+   * the frame line says where it stands. Above the middle at every width, so alarms stay in sight. While more rows
+   * wait for you (`--alarm-rows`, set by the zone), it grows for them up to half the window, in whole rows, before
+   * the middle gives way no further (B14: a waiting request must never sit out of sight).
+   */
+  .tile[data-tile="alarm"] {
+    --alarm-min: 6;
+    grid-template-rows: var(--row) auto;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .tile[data-tile="alarm"] > .tile-b {
+    max-height: max(
+      calc(var(--alarm-min) * var(--row)),
+      min(calc(var(--alarm-rows, var(--alarm-min)) * var(--row)), calc(50vh - var(--row)))
+    );
+  }
+  /* Where round() is known, whole rows only: a cut row would read as one more alarm. */
+  @supports (height: round(down, 50dvh, 20px)) {
+    .tile[data-tile="alarm"] > .tile-b {
+      max-height: max(
+        calc(var(--alarm-min) * var(--row)),
+        min(calc(var(--alarm-rows, var(--alarm-min)) * var(--row)), round(down, 50dvh - var(--row), var(--row)))
+      );
+    }
+  }
+  .tile[data-tile="alarm"] .tile-a .link {
+    padding: 0;
+    color: var(--text-2);
+  }
+  /*
+   * ---------- Header: one line of text (rules 2, 7) ----------
+   * Too long for a narrow window, it scrolls sideways inside its own line (no bar shown), never the page; the gear
+   * stands at its end. Spaces between parts are whole columns.
+   */
+  /* Relative: screen-reader text (.sr, absolute) must stay inside the line's own scroll, not widen the page. */
+  .screen-top .hd {
+    position: relative;
+    display: flex;
+    gap: 2ch;
+    height: var(--row);
+    padding: 0 0 0 1ch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    white-space: nowrap;
+    color: var(--text-2);
+    background: var(--bg-0);
+    border-bottom: 0;
+  }
+  .hd::-webkit-scrollbar {
+    display: none;
+  }
+  /* Nothing shrinks: what does not fit scrolls, instead of parts lying over each other. */
+  .hd > * {
+    flex: none;
+  }
+  .hd-name {
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  /* The version starts with a real space (copying the header gives "Claude Fleet 6.0.0"); the margin takes back the
+     second column of the gap, so the look is the old one column (round 8). */
+  .hd-ver {
+    margin-left: -2ch;
+    white-space: pre;
+  }
+  .hd-nav,
+  .hd-counts {
+    display: flex;
+    gap: 0 1ch;
+  }
+  .hd-counts {
+    gap: 0 2ch;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .hd-nav a,
+  .hd-c {
+    padding: 0;
+    font: inherit;
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  .hd-nav a[aria-current="page"] {
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  .hd-c {
+    display: inline-flex;
+    gap: 0 1ch;
+  }
+  .hd-c b {
+    font-weight: 400;
+  }
+  /* A counter: the character right before its number (`?7`). */
+  .hd-n {
+    gap: 0;
+  }
+  .hd-on,
+  .hd-hot {
+    color: var(--text-1);
+  }
+  .hd-warn {
+    color: var(--warn-text);
+  }
+  .hd-crit {
+    color: var(--crit-text);
+  }
+  /*
+   * At the end of the line, not sticky: on a phone a sticky gear would cover what scrolls under it. Its own stacking
+   * level, or the tiles below would cover the settings panel.
+   */
+  .hd-gear {
+    position: relative;
+    z-index: 30;
+    margin-left: auto;
+    padding: 0 1ch;
+    background: var(--bg-0);
+  }
+  /* Phone: the gear right after the name, so settings are in sight without scrolling the line (practical test 15 Oct);
+     the version gives its columns. Order only, never sticky (see above). */
+  /* Between 1024 and 1180 px the header fits on one line with one space between its parts (round 4: 37 px too wide
+     in German at 1024, "Claude Fleet" cut on the left). */
+  @media (max-width: 1179px) {
+    .screen-top .hd,
+    .hd-counts {
+      gap: 0 1ch;
+    }
+    /* The gap is one column here: the version's own space is it, the margin takes back the rest. */
+    .hd-ver {
+      margin-left: -1ch;
+    }
+  }
+  @media (max-width: 519px) {
+    .hd-ver {
+      display: none;
+    }
+    .hd-gear {
+      order: -1;
+      margin-left: 0;
+    }
+    .hd-name {
+      order: -2;
+    }
+  }
+  /* ---------- Settings behind the gear: an overlay panel, its choices as text ---------- */
+  .settings {
+    position: relative;
+  }
+  .iconbtn {
+    display: grid;
+    place-items: center;
+    width: 2ch;
+    height: var(--row);
+    color: var(--text-1);
+  }
+  /* Fixed, so the header's own sideways scroll does not cut it off. */
+  .settings-panel {
+    position: fixed;
+    top: var(--row);
+    right: 1ch;
+    z-index: 30;
+    display: grid;
+    gap: calc(var(--row) / 2);
+    min-width: 30ch;
+    padding: calc(var(--row) / 2) 1ch;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    white-space: normal;
+  }
+  .settings-panel[hidden] {
+    display: none;
+  }
+  .theme {
+    display: flex;
+    gap: 0 2ch;
+  }
+  .theme button {
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+    padding: 0;
+    color: var(--text-2);
+  }
+  .theme svg.i {
+    width: 14px;
+    height: 14px;
+    vertical-align: 0;
+  }
+  /* The chosen option as in the drawer's tabs: bright, bold, underlined in --sel. */
+  .theme button.on {
+    color: var(--text-1);
+    font-weight: 700;
+    text-decoration: underline 2px var(--sel);
+    text-underline-offset: 4px;
+  }
+  @media (max-width: 700px) {
+    .theme button span {
+      display: none;
+    }
+  }
+  /* ---------- Message row: zero lines or one, cut with an ellipsis; only the × stays whole ---------- */
+  .msgrow {
+    display: flex;
+    gap: 1ch;
+    height: var(--row);
+    padding: 0 1ch;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    white-space: nowrap;
+    color: var(--text-2);
+  }
+  .msg-t {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+  .msg-t > *,
+  .msg-cut {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .msg-t > .msg-note {
+    display: flex;
+  }
+  .msg-mode {
+    flex: none;
+    white-space: pre;
+  }
+  .msg-t > * + *::before {
+    content: " · ";
+    white-space: pre;
+  }
+  .msg-t kbd,
+  .msg-t .link {
+    padding: 0;
+    font: inherit;
+    border: 0;
+    background: none;
+  }
+  .msg-off {
+    color: var(--crit-text);
+  }
+  .msg-warn {
+    color: var(--text-1);
+  }
+  .msgrow .msg-x {
+    flex: none;
+    padding: 0;
+    font: inherit;
+  }
+  /* ---------- A tile: frame line with the title, then the body that scrolls ---------- */
+  .tile {
+    position: relative;
+    display: grid;
+    grid-template-rows: var(--row) minmax(0, 1fr);
+    min-height: 0;
+    min-width: 0;
+  }
+  /*
+   * The frame is one rectangle whose top edge runs through the middle of the title line; the title covers the line
+   * with the page background (btop, lazygit: the title in the frame). Heights stay whole lines.
+   */
+  .tile::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--row) / 2) 0 0 0;
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  /* Rule 6: the active tile's frame in --sel, all others --line; the active tile follows the focus (lib/tiles.ts). */
+  .tile[data-active]::before {
+    border-color: var(--sel);
+  }
+  .tile-h {
+    position: relative;
+    display: flex;
+    gap: 1ch;
+    padding: 0 1ch;
+    min-width: 0;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    white-space: nowrap;
+    color: var(--text-1);
+  }
+  .tile-h > * {
+    background: var(--bg-0);
+    padding: 0 1ch;
+  }
+  .tile-t {
+    font-weight: 700;
+  }
+  .tile-nr,
+  .tile-n,
+  .tile-h .pos {
+    color: var(--text-2);
+    font-weight: 400;
+  }
+  .tile-h .pos {
+    margin-left: auto;
+  }
+  /* Waiting rows a scroll would bring up (B14): orange text, "waits for your yes" is what --warn means. */
+  .tile-h .tile-below {
+    margin-left: auto;
+    color: var(--warn-text);
+  }
+  .tile-h .tile-below ~ .pos {
+    margin-left: 1ch;
+  }
+  .tile-b {
+    /* Rule 3: scroll only in the tile; the frame stands still. Positioned, so hidden screen reader text (.sr) deep in
+       a long table stays inside the scrolling body instead of stretching the screen (round 3: the page scrolled). */
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    min-width: 0;
+    scrollbar-width: thin;
+    /* Inside the frame: one pixel off each edge, so the frame line stays visible beside the scroll bar. */
+    margin: 0 1px 1px;
+    outline: none;
+  }
+  .tile-b:focus-visible {
+    outline: 1px solid var(--sel);
+    outline-offset: -1px;
+  }
+  .tile-a {
+    color: var(--text-2);
+  }
+  .tile-a .link {
+    font: inherit;
+  }
+  .tile-empty {
+    margin: 0;
+    padding: 0 1ch;
+    color: var(--text-2);
+  }
+
+  /*
+   * ---------- The middle: the route's tiles side by side (rule 2) ----------
+   * "Now" has the repo bar (28 columns), the watch board (the rest) and the event stream (36 columns); every other
+   * area one tile. Flex, not a grid with fixed tracks: the tiles a route brings decide the columns, and `+` drops
+   * all but the one in front.
+   */
+  .middle {
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+  }
+  .middle > .tile {
+    flex: 1 1 0;
+  }
+  /* The side tiles stand on the character grid: their widths count in the grid font's columns. */
+  .middle > .tile[data-tile="repos"],
+  .middle > .tile[data-tile="stream"] {
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .middle > .tile[data-tile="repos"] {
+    flex: 0 0 var(--col-repos);
+  }
+  /*
+   * From 1280 px the side tiles take what their longest values need (round 7: at 1440 px "billing-service", the PR numbers,
+   * "#48✗+2" and "?1●1·1" were cut in the repo bar, repo names in the stream): the repo bar name 17 · `±4` 4 ·
+   * `#48✗+2` 8 · `?1●1·1` 8; the stream time 6 · mark 2 · repo 17 (its title has no room left and gives way). Below that the old 28 and 36 columns stay.
+   */
+  @media (min-width: 1280px) {
+    .st-t {
+      display: none;
+    }
+    .middle {
+      --col-repos: 37ch;
+      --col-stream: 26ch;
+    }
+  }
+  .middle > .tile[data-tile="stream"] {
+    flex: 0 0 var(--col-stream);
+  }
+  /*
+   * `+`: only the tile in front (rule 17). A view without that tile (another area than "Now") keeps its own: the
+   * rule only hides when the tile in front is there.
+   */
+  .middle[data-zoom]:has(> .tile[data-front]) > .tile:not([data-front]) {
+    display: none;
+  }
+  .middle[data-zoom] > .tile[data-front] {
+    flex: 1 1 0;
+  }
+  /* The tab row only shows under 100 columns. */
+  .tabrow {
+    display: none;
+  }
+  /*
+   * Under 100 columns (rule 17): the middle shows the tile in front alone, full width, and over it the tab row
+   * `1 Alarm · 2 Repos · 3 Wache · 4 Strom · 5 Schublade`.
+   */
+  @media (max-width: 779px) {
+    .middle {
+      flex-direction: column;
+    }
+    .middle:has(> .tile[data-front]) > .tile:not([data-front]) {
+      display: none;
+    }
+    .middle > .tile[data-tile] {
+      flex: 1 1 0;
+    }
+    .tabrow {
+      display: flex;
+      flex: 0 0 var(--row);
+      gap: 0 2ch;
+      padding: 0 1ch;
+      overflow: hidden;
+      font-family: var(--font);
+      font-size: var(--fs);
+      line-height: var(--row);
+      white-space: nowrap;
+    }
+    .tabrow button {
+      padding: 0;
+      font: inherit;
+      color: var(--text-2);
+    }
+    .tabrow button[aria-current] {
+      color: var(--text-1);
+      font-weight: 700;
+    }
+  }
+
+  /*
+   * ---------- Status line: mode · keys being typed · last result ……… the active tile's keys (rule 5) ----------
+   * One grid line in the grid font; keys are text, no frame around them.
+   */
+  .statusline {
+    display: flex;
+    align-items: center;
+    gap: 2ch;
+    min-width: 0;
+    height: var(--row);
+    padding: 0 1ch;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-2);
+    background: var(--bg-1);
+  }
+  .statusline kbd {
+    padding: 0;
+    font: inherit;
+    color: var(--text-1);
+    border: 0;
+    background: none;
+  }
+  .sl-mode {
+    flex: none;
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  /* A result is read once: it keeps its width and the tile's keys give way (round 3: "hidden; u bring…"). */
+  .sl-last {
+    flex: 1 0 auto;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-1);
+  }
+  .sl-at {
+    color: var(--text-2);
+  }
+  /* A y/n question takes the line (round 7): whole, its two buttons never cut; the long text gives way first. */
+  .sl-ask {
+    display: flex;
+    flex: 1 1 auto;
+    gap: 1ch;
+    min-width: 0;
+    color: var(--text-1);
+  }
+  .sl-ask-t {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* On the line's own height: an `.act-link` is 24 px high, and the line would cut it (round 7). */
+  .sl-ask > button {
+    flex: none;
+    height: var(--row);
+    padding: 0;
+    font: inherit;
+    line-height: var(--row);
+  }
+  .sl-tile {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* ---------- Command line: the last line, suggestions in the lines right above it (rule 4) ---------- */
+  .cmdline {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    height: var(--row);
+    padding: 0 1ch;
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+    background: var(--bg-0);
+    color: var(--text-1);
+  }
+  .cmd-prompt {
+    width: 2ch;
+    flex: none;
+    color: var(--text-2);
+  }
+  .cmdline input {
+    all: unset;
+    flex: 1;
+    min-width: 0;
+    height: var(--row);
+    font: inherit;
+    color: var(--text-1);
+    /* The cursor marks the one place that takes typing (colour grammar: --att is what can be edited). */
+    caret-color: var(--att);
+  }
+  .cmdline input::placeholder {
+    color: var(--text-2);
+    opacity: 1;
+  }
+  .cmd-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    z-index: 40;
+    max-height: calc(var(--suggest-rows) * var(--row));
+    overflow-y: auto;
+    background: var(--bg-1);
+    border-top: 1px solid var(--line);
+  }
+  .cmd-list[hidden] {
+    display: none;
+  }
+  .cmd-list [role="option"] {
+    display: flex;
+    gap: 2ch;
+    height: var(--row);
+    padding: 0 1ch 0 calc(3ch - 2px);
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .cmd-list [aria-selected="true"] {
+    background: var(--sel-bg);
+    border-left-color: var(--sel);
+  }
+  .cmd-list .cmd-l {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cmd-list kbd {
+    font: inherit;
+    color: var(--text-2);
+  }
+  /* On a phone the status line keeps mode and result; the pending keys would push them out. */
+  @media (max-width: 700px) {
+    .sl-keys {
+      display: none;
+    }
+  }
+}

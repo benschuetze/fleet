@@ -1,0 +1,55 @@
+{
+  "name": "claude-fleet",
+  "version": "6.1.1",
+  "description": "Local dashboard for parallel Claude Code sessions: status, efficiency hints, repos, PRs, CI and usage",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "react-router build && tsx scripts/bundle.ts",
+    "dev": "tsx scripts/dev.ts",
+    "demo": "pnpm build && node dist/fleet.cjs serve --demo --open",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "pnpm build && vitest run",
+    "test:e2e": "playwright test",
+    "check:quick": "pnpm typecheck && pnpm lint && pnpm build && vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm build && vitest run && playwright test",
+    "prepare": "node scripts/hooks-path.mjs",
+    "hook-latency": "tsx scripts/hook-latency.ts",
+    "overview-latency": "tsx scripts/overview-latency.ts",
+    "screenshots": "tsx scripts/screenshots.ts"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@biomejs/biome": "^2.5.15",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@playwright/test": "1.64.0",
+    "@react-router/dev": "^7.18.4",
+    "@react-router/node": "^7.18.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "esbuild": "^0.28.2",
+    "lucide-react": "^1.55.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^7.18.4",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  },
+  "optionalDependencies": {
+    "@lydell/node-pty": "1.2.0-beta.15"
+  }
+}

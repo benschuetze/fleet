@@ -1,0 +1,213 @@
+/*
+ * The diff view (release 6, plan R9, R10): a layer over every view like the log view, the whole screen above the
+ * status line. Left the files, right the diff on the character grid: old and new line number, sign, text. Red and
+ * green only for removed and added lines (--diff-*), everything else grey. Loaded after log.css.
+ */
+@layer components {
+  .diffview {
+    position: fixed;
+    inset: 0 0 var(--foot) 0;
+    z-index: 35;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-0);
+    color: var(--text-1);
+    font-family: var(--font);
+    font-size: var(--fs);
+    line-height: var(--row);
+  }
+  .df-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0 2ch;
+    padding: 0 1ch;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-1);
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .df-head h2 {
+    margin: 0;
+    font: inherit;
+    font-weight: 700;
+  }
+  .df-title {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 8ch;
+  }
+  .df-meta,
+  .df-hint {
+    color: var(--text-2);
+  }
+  .df-meta {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .df-head .link {
+    padding: 0;
+    font: inherit;
+  }
+  .df-search {
+    display: flex;
+    gap: 1ch;
+    padding: 0 1ch;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-2);
+  }
+  .df-search input.search {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--text-1);
+    font: inherit;
+    outline: none;
+    caret-color: var(--att);
+  }
+  .df-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(20ch, 40ch) minmax(0, 1fr);
+    min-height: 0;
+  }
+  .df-files {
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+  }
+  .df-files ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .df-files button {
+    display: grid;
+    grid-template-columns: 2ch 2ch minmax(0, 1fr) auto;
+    width: 100%;
+    padding: 0 1ch;
+    border: 0;
+    background: none;
+    color: var(--text-1);
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .df-files button[aria-current="true"] {
+    background: var(--sel-bg);
+    box-shadow: inset 2px 0 0 var(--sel);
+    font-weight: 700;
+  }
+  .df-path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
+  }
+  .df-n {
+    padding-left: 1ch;
+  }
+  .df-st {
+    color: var(--text-2);
+  }
+  .df-mine {
+    color: var(--text-1);
+  }
+  .df-add {
+    color: var(--diff-add);
+  }
+  .df-del {
+    color: var(--diff-del);
+  }
+  .df-main {
+    overflow: auto;
+    min-width: 0;
+    outline: none;
+  }
+  .df-main:focus-visible {
+    box-shadow: inset 2px 0 0 var(--sel);
+  }
+  .df-file h3 {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 0 1ch;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-1);
+    font: inherit;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .df-hh {
+    padding: 0 1ch;
+    color: var(--text-2);
+    background: var(--bg-1);
+    white-space: pre;
+  }
+  .df-l {
+    display: grid;
+    grid-template-columns: 6ch 6ch 2ch max-content;
+    white-space: pre;
+    min-height: var(--row);
+  }
+  .df-l > span {
+    padding-left: 1ch;
+  }
+  .df-na,
+  .df-nb {
+    color: var(--text-2);
+    text-align: right;
+    padding-right: 1ch;
+    user-select: none;
+  }
+  .df-sg {
+    user-select: none;
+  }
+  .df-l.add {
+    background: var(--diff-add-bg);
+    color: var(--diff-add);
+  }
+  .df-l.del {
+    background: var(--diff-del-bg);
+    color: var(--diff-del);
+  }
+  /* The change or hit n went to: the selection edge, as a selected row. */
+  .df-l[data-cur] {
+    box-shadow: inset 2px 0 0 var(--sel);
+  }
+  /* A search hit: bold and underlined, so it shows on a red or green line too. */
+  .df-l[data-hit] .df-tx {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+  /* The whole file: one number column. */
+  .df-file > .df-l:not(.add):not(.del) {
+    grid-template-columns: 7ch max-content;
+  }
+  .df-empty {
+    margin: 0;
+    padding: 0 1ch;
+    color: var(--text-2);
+  }
+  .df-foot {
+    min-height: var(--row);
+    padding: 0 1ch;
+    border-top: 1px solid var(--line);
+    color: var(--text-2);
+  }
+  @media (max-width: 779px) {
+    .df-body {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 6lh) minmax(0, 1fr);
+    }
+    .df-files {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+}

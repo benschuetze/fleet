@@ -1,0 +1,5 @@
+{
+  "lines": 41802,
+  "counts": "app, server, hooks, shared: .ts, .tsx, .css without tests",
+  "rule": "Scope frozen at 6.0.0 (docs/SCOPE.md). Raise only with a reason in the same commit; cutting a feature lowers it."
+}

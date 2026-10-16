@@ -1,0 +1,158 @@
+/*
+ * The side tiles of "Now" (spec, "Ein Schirm im CLI-Look", rule 2): the repo bar on the left, the event stream on the
+ * right, both on the character grid and grey. Loaded after rows.css.
+ */
+@layer components {
+  /*
+   * ---------- Repo bar, the left tile: `shop-frontend ±4 #48✗ ?1●1` in 28 columns ----------
+   * The name takes what the others leave; each other cell starts with one empty column. The "Details" column only
+   * shows where the tile is wider than its 28 columns (zoomed, on a phone): Shift+Enter and Shift+click reach the
+   * drawer there.
+   */
+  .tile[data-tile="repos"] {
+    container-type: inline-size;
+  }
+  table.rtable {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Plan 3.2: name 13 · `±4` 3 · `#48✗` 5 · `?1●1` 6; each with its one empty column in front. */
+  .rtable col.c-local {
+    width: 3ch;
+  }
+  .rtable col.c-prs {
+    width: 5ch;
+  }
+  .rtable col.c-counts {
+    width: 6ch;
+  }
+  @media (min-width: 1280px) {
+    .rtable col.c-local {
+      width: 4ch;
+    }
+    .rtable col.c-prs,
+    .rtable col.c-counts {
+      width: 8ch;
+    }
+  }
+  .rtable col.c-act,
+  .rtable .rb-act {
+    display: none;
+  }
+  @container (min-width: 44ch) {
+    .rtable col.c-act {
+      display: table-column;
+      width: 9ch;
+    }
+    .rtable .rb-act {
+      display: table-cell;
+    }
+  }
+  /* Cells by class, not `td`: the watch board's `td` rules (rows.css) would otherwise compete in specificity. */
+  .rtable .rc {
+    height: var(--row);
+    /* One pixel of slack: `±4` in exactly two columns would otherwise end in an ellipsis on a sub-pixel. */
+    padding: 0 0 0 calc(1ch - 1px);
+    /* The grid's one font and size (app.css gives cells their own). */
+    font: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-2);
+  }
+  .rtable .rc:first-child {
+    padding-left: calc(1ch - 2px);
+    border-left: 2px solid transparent;
+  }
+  .rtable .rc.rb-name {
+    color: var(--text-1);
+  }
+  .rtable .rb-name .opener {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: inherit;
+    text-align: left;
+  }
+  .rtable tr[aria-current] .rc.rb-name {
+    font-weight: 700;
+  }
+  .rtable .act-link,
+  .rtable .fold {
+    padding: 0;
+    font: inherit;
+  }
+  /* Hover and the chosen repo last: the chosen line keeps its mark under the pointer. */
+  .rtable tbody tr:hover > .rc {
+    background: var(--bg-2);
+  }
+  .rtable tbody tr[aria-current] > .rc {
+    background: var(--sel-bg);
+  }
+  .rtable tbody tr[aria-current] > .rc:first-child {
+    border-left-color: var(--sel);
+  }
+
+  /*
+   * ---------- Event stream, the right tile: `22:58 ✓ design-system Docs für…` in 36 columns ----------
+   * Time 5 · mark 1 · repo 12 · title the rest, each after one empty column. Grey: the stream is history.
+   */
+  .st-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .st-list > li {
+    display: flex;
+    height: var(--row);
+    padding-left: calc(1ch - 2px);
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+    color: var(--text-2);
+  }
+  /* The selected line, as on the board: the light background and the edge in --sel. */
+  .st-list > li:focus-within {
+    background: var(--sel-bg);
+    border-left-color: var(--sel);
+    color: var(--text-1);
+  }
+  .st-list time {
+    flex: 0 0 6ch;
+  }
+  .st-go {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    outline: none;
+  }
+  .st-m {
+    flex: 0 0 2ch;
+  }
+  .st-r,
+  .st-t {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .st-r {
+    flex: 0 0 13ch;
+    padding-right: 1ch;
+    color: var(--text-1);
+  }
+  .st-t {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  @media (min-width: 1280px) {
+    .st-r {
+      flex-basis: 17ch;
+    }
+  }
+}

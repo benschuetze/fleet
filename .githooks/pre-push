@@ -1,0 +1,55 @@
+#!/bin/sh
+# Local gate: every push runs the quick check (types, lint, build, unit tests). Red means no push.
+# Pushes that only touch docs/ or Markdown skip it. Emergency exit: git push --no-verify.
+# Enabled per clone by "pnpm install" (package.json "prepare" sets core.hooksPath to .githooks).
+# FLEET_PREPUSH_CMD replaces the check (tests use it).
+
+# Git runs hooks with GIT_DIR and friends set; the check's own tests create temp repos and must not inherit them.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR GIT_OBJECT_DIRECTORY
+
+zero=0000000000000000000000000000000000000000
+files=""
+pushed=""
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # deleting a remote branch
+  pushed="$pushed $local_sha"
+  if [ "$remote_sha" = "$zero" ]; then
+    base=$(git merge-base origin/main "$local_sha" 2>/dev/null) || base=""
+  else
+    base=$remote_sha
+  fi
+  if [ -z "$base" ]; then
+    files="$files
+(unknown)"
+  else
+    files="$files
+$(git diff --no-renames --name-only "$base" "$local_sha" 2>/dev/null || echo '(unknown)')"
+  fi
+done
+
+code=$(printf '%s\n' "$files" | grep -v '^$' | grep -v -E '^docs/|\.md$' || true)
+[ -z "$(printf '%s' "$files" | tr -d '\n')" ] && exit 0 # nothing to push
+if [ -z "$code" ]; then
+  echo "pre-push: docs only, check skipped"
+  exit 0
+fi
+
+# The check runs on the working tree. Say so when that is not what goes out.
+for sha in $(printf '%s\n' "$pushed"); do
+  [ "$sha" = "$(git rev-parse HEAD 2>/dev/null)" ] ||
+    echo "pre-push: warning: pushing $sha, but the check sees the checked-out HEAD"
+done
+[ -z "$(git status --porcelain --untracked-files=no 2>/dev/null)" ] ||
+  echo "pre-push: warning: uncommitted changes are part of the check, not of the push"
+
+cmd=${FLEET_PREPUSH_CMD:-pnpm check:quick}
+log=$(mktemp "${TMPDIR:-/tmp}/fleet-prepush.XXXXXX")
+start=$(date +%s)
+if sh -c "$cmd" >"$log" 2>&1; then
+  echo "pre-push: $cmd green in $(($(date +%s) - start)) s"
+  rm -f "$log"
+  exit 0
+fi
+tail -n 30 "$log"
+echo "pre-push: $cmd failed, push stopped (log: $log; skip once with git push --no-verify)"
+exit 1
